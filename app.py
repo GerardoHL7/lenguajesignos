@@ -16,12 +16,11 @@ if not os.path.exists(RUTA_MODELO):
     with st.spinner("Descargando modelo... Esto puede tardar un momento ⏳"):
         gdown.download(URL_MODELO, RUTA_MODELO, quiet=False)
 
-# Cargar el modelo
+# Cargar el modelo solo cuando sea necesario
 @st.cache_resource
 def cargar_modelo():
-    return load_model(RUTA_MODELO)
-
-modelo = cargar_modelo()
+    modelo = load_model(RUTA_MODELO)
+    return modelo
 
 # Diccionario de clases (ajusta según tu dataset)
 clases = {0: "0", 1: "1", 2: "2", 3: "3", 4: "4", 5: "5"}
@@ -34,7 +33,8 @@ imagen_subida = st.file_uploader("Sube una imagen...", type=["jpg", "png", "jpeg
 
 if imagen_subida is not None:
     # Cargar y mostrar la imagen
-    imagen = Image.open(imagen_subida).convert("RGB")
+    imagen = Image.open(imagen_subida)
+    imagen = imagen.convert("RGB")  # Asegurarse de que sea RGB
     st.image(imagen, caption="Imagen cargada", use_column_width=True)
 
     # Redimensionar la imagen a 64x64 (ajustar según el tamaño de entrada de tu modelo)
@@ -46,9 +46,16 @@ if imagen_subida is not None:
     # Añadir la dimensión de batch (necesario para predicciones en Keras)
     imagen_array = np.expand_dims(imagen_array, axis=0)  # Ahora tiene forma (1, 64, 64, 3)
 
+    # Cargar el modelo solo cuando se sube una imagen
+    if 'modelo' not in st.session_state:
+        st.session_state.modelo = cargar_modelo()
+
+    modelo = st.session_state.modelo
+
     # Hacer la predicción
     prediccion = modelo.predict(imagen_array)
     clase_predicha = np.argmax(prediccion)  # Obtener la clase con la probabilidad más alta
 
     # Mostrar el resultado
     st.write(f"El modelo predice que estás mostrando el número: **{clases[clase_predicha]}** ✋")
+
