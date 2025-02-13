@@ -41,12 +41,12 @@ if imagen_subida is not None:
     imagen = imagen.resize((64, 64))  # Cambia (64, 64) según lo que necesite tu modelo
 
     # Convertir la imagen a un array numpy y normalizar (valores entre 0 y 1)
-    imagen_array = np.array(imagen) / 255.0  # Normalización a [0, 1]
+    imagen_array = np.array(imagen, dtype=np.float32) / 255.0  # Normalización a [0, 1]
 
     # Verificar la forma de la imagen antes de pasarla al modelo
     print(f"Forma de la imagen (sin expandir dimensiones): {imagen_array.shape}")
 
-    # Verificar si la imagen tiene 3 canales (RGB)
+    # Asegurarse de que la imagen tenga la forma correcta (1, 64, 64, 3)
     if len(imagen_array.shape) == 3 and imagen_array.shape[2] == 3:
         # La imagen tiene 3 canales, no hacer nada
         pass
@@ -67,9 +67,13 @@ if imagen_subida is not None:
     modelo = st.session_state.modelo
 
     # Hacer la predicción
-    prediccion = modelo.predict(imagen_array)
-    clase_predicha = np.argmax(prediccion)  # Obtener la clase con la probabilidad más alta
+    try:
+        prediccion = modelo.predict(imagen_array)
+        clase_predicha = np.argmax(prediccion)  # Obtener la clase con la probabilidad más alta
 
-    # Mostrar el resultado
-    st.write(f"El modelo predice que estás mostrando el número: **{clases[clase_predicha]}** ✋")
+        # Mostrar el resultado
+        st.write(f"El modelo predice que estás mostrando el número: **{clases[clase_predicha]}** ✋")
+    except Exception as e:
+        st.error(f"Ha ocurrido un error durante la predicción: {e}")
+
 
