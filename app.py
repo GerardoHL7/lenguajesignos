@@ -43,8 +43,11 @@ if imagen_subida is not None:
     # Convertir la imagen a un array numpy y normalizar (valores entre 0 y 1)
     imagen_array = np.array(imagen) / 255.0  # Normalización a [0, 1]
 
-    # Añadir la dimensión de batch (necesario para predicciones en Keras)
-    imagen_array = np.expand_dims(imagen_array, axis=0)  # Ahora tiene forma (1, 64, 64, 3)
+    # Verificar la forma de la imagen antes de pasarla al modelo
+    print(f"Forma de la imagen: {imagen_array.shape}")
+
+    # Asegurarse de que la imagen tenga la forma correcta (1, 64, 64, 3)
+    imagen_array = np.expand_dims(imagen_array, axis=0)  # Añadir la dimensión de batch: (1, 64, 64, 3)
 
     # Cargar el modelo solo cuando se sube una imagen
     if 'modelo' not in st.session_state:
