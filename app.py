@@ -44,10 +44,21 @@ if imagen_subida is not None:
     imagen_array = np.array(imagen) / 255.0  # Normalización a [0, 1]
 
     # Verificar la forma de la imagen antes de pasarla al modelo
-    print(f"Forma de la imagen: {imagen_array.shape}")
+    print(f"Forma de la imagen (sin expandir dimensiones): {imagen_array.shape}")
+
+    # Verificar si la imagen tiene 3 canales (RGB)
+    if len(imagen_array.shape) == 3 and imagen_array.shape[2] == 3:
+        # La imagen tiene 3 canales, no hacer nada
+        pass
+    else:
+        # Si no tiene 3 canales, convertirla a RGB
+        imagen_array = np.stack([imagen_array] * 3, axis=-1)  # Convertir a RGB
 
     # Asegurarse de que la imagen tenga la forma correcta (1, 64, 64, 3)
     imagen_array = np.expand_dims(imagen_array, axis=0)  # Añadir la dimensión de batch: (1, 64, 64, 3)
+
+    # Verificar la forma de la imagen antes de pasársela al modelo
+    print(f"Forma de la imagen (con dimensión de batch): {imagen_array.shape}")
 
     # Cargar el modelo solo cuando se sube una imagen
     if 'modelo' not in st.session_state:
