@@ -7,7 +7,7 @@ import gdown
 import os
 
 # Enlace de Google Drive con el modelo (reemplaza con tu ID de archivo)
-ID_MODELO = "1-HYnvXZQFycx9rYGogBN1CMffHHoXmuX"
+ID_MODELO = "1121-HYnvXZQFycx9rYGogBN1CMffHHoXmuX"
 URL_MODELO = f"https://drive.google.com/uc?id={ID_MODELO}"
 RUTA_MODELO = "mimodelo.h5"
 
@@ -37,8 +37,13 @@ if imagen_subida is not None:
     imagen = imagen.convert("RGB")  # Asegurarse de que sea RGB
     st.image(imagen, caption="Imagen cargada", use_column_width=True)
 
-    # Redimensionar la imagen a 64x64 (ajustar según el tamaño de entrada de tu modelo)
-    imagen = imagen.resize((64, 64))  # Cambia (64, 64) según lo que necesite tu modelo
+    # Redimensionar la imagen a las dimensiones que el modelo espera (obtenemos el tamaño de entrada del modelo)
+    modelo = cargar_modelo()
+    input_shape = modelo.input_shape  # Verificar la forma de la entrada esperada por el modelo
+    print(f"Forma de entrada esperada por el modelo: {input_shape}")
+
+    # Asumiendo que el modelo espera imágenes de entrada de 224x224, redimensionamos
+    imagen = imagen.resize((input_shape[1], input_shape[2]))  # Ajustamos las dimensiones a las del modelo
 
     # Convertir la imagen a un array numpy y normalizar (valores entre 0 y 1)
     imagen_array = np.array(imagen, dtype=np.float32) / 255.0  # Normalización a [0, 1]
@@ -46,28 +51,11 @@ if imagen_subida is not None:
     # Verificar la forma de la imagen antes de pasarla al modelo
     print(f"Forma de la imagen (sin expandir dimensiones): {imagen_array.shape}")
 
-    # Asegurarse de que la imagen tenga la forma correcta (1, 64, 64, 3)
-    if len(imagen_array.shape) == 3 and imagen_array.shape[2] == 3:
-        # La imagen tiene 3 canales, no hacer nada
-        pass
-    else:
-        # Si no tiene 3 canales, convertirla a RGB
-        imagen_array = np.stack([imagen_array] * 3, axis=-1)  # Convertir a RGB
-
-    # Asegurarse de que la imagen tenga la forma correcta (1, 64, 64, 3)
-    imagen_array = np.expand_dims(imagen_array, axis=0)  # Añadir la dimensión de batch: (1, 64, 64, 3)
+    # Asegurarse de que la imagen tenga la forma correcta (1, 224, 224, 3) por ejemplo
+    imagen_array = np.expand_dims(imagen_array, axis=0)  # Añadir la dimensión de batch: (1, 224, 224, 3)
 
     # Verificar la forma de la imagen antes de pasársela al modelo
     print(f"Forma de la imagen (con dimensión de batch): {imagen_array.shape}")
-
-    # Aplanar la imagen a un vector (si es necesario)
-    imagen_array = imagen_array.reshape(-1, 33856)  # Asegurarse de que la imagen tenga la forma correcta para el modelo
-
-    # Cargar el modelo solo cuando se sube una imagen
-    if 'modelo' not in st.session_state:
-        st.session_state.modelo = cargar_modelo()
-
-    modelo = st.session_state.modelo
 
     # Hacer la predicción
     try:
@@ -78,5 +66,4 @@ if imagen_subida is not None:
         st.write(f"El modelo predice que estás mostrando el número: **{clases[clase_predicha]}** ✋")
     except Exception as e:
         st.error(f"Ha ocurrido un error durante la predicción: {e}")
-
 
