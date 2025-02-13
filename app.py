@@ -6,7 +6,7 @@ from PIL import Image
 import gdown
 import os
 
-# Enlace de Google Drive con el modelo (cambia el ID por el tuyo)
+# Enlace de Google Drive con el modelo (reemplaza con tu ID de archivo)
 ID_MODELO = "1-HYnvXZQFycx9rYGogBN1CMffHHoXmuX"
 URL_MODELO = f"https://drive.google.com/uc?id={ID_MODELO}"
 RUTA_MODELO = "mimodelo.h5"
@@ -33,17 +33,22 @@ st.write("Sube una imagen de tu mano mostrando un número en lenguaje de signos.
 imagen_subida = st.file_uploader("Sube una imagen...", type=["jpg", "png", "jpeg"])
 
 if imagen_subida is not None:
+    # Cargar y mostrar la imagen
     imagen = Image.open(imagen_subida).convert("RGB")
     st.image(imagen, caption="Imagen cargada", use_column_width=True)
 
-    # Preprocesar la imagen
-    imagen = imagen.resize((64, 64))
-    imagen_array = np.array(imagen) / 255.0
-    imagen_array = np.expand_dims(imagen_array, axis=0)
+    # Redimensionar la imagen a 64x64 (ajustar según el tamaño de entrada de tu modelo)
+    imagen = imagen.resize((64, 64))  # Cambia (64, 64) según lo que necesite tu modelo
+
+    # Convertir la imagen a un array numpy y normalizar (valores entre 0 y 1)
+    imagen_array = np.array(imagen) / 255.0  # Normalización a [0, 1]
+
+    # Añadir la dimensión de batch (necesario para predicciones en Keras)
+    imagen_array = np.expand_dims(imagen_array, axis=0)  # Ahora tiene forma (1, 64, 64, 3)
 
     # Hacer la predicción
     prediccion = modelo.predict(imagen_array)
-    clase_predicha = np.argmax(prediccion)
+    clase_predicha = np.argmax(prediccion)  # Obtener la clase con la probabilidad más alta
 
-    # Mostrar resultado
+    # Mostrar el resultado
     st.write(f"El modelo predice que estás mostrando el número: **{clases[clase_predicha]}** ✋")
