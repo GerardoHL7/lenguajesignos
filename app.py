@@ -60,6 +60,9 @@ if imagen_subida is not None:
     # Verificar la forma de la imagen antes de pasársela al modelo
     print(f"Forma de la imagen (con dimensión de batch): {imagen_array.shape}")
 
+    # Aplanar la imagen a un vector (si es necesario)
+    imagen_array = imagen_array.reshape(-1, 33856)  # Asegurarse de que la imagen tenga la forma correcta para el modelo
+
     # Cargar el modelo solo cuando se sube una imagen
     if 'modelo' not in st.session_state:
         st.session_state.modelo = cargar_modelo()
