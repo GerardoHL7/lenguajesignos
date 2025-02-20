@@ -1,4 +1,3 @@
-import streamlit as st
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
@@ -66,4 +65,3 @@ if imagen_subida is not None:
         st.write(f"El modelo predice que estás mostrando el número: **{clases[clase_predicha]}** ✋")
     except Exception as e:
         st.error(f"Ha ocurrido un error durante la predicción: {e}")
-
